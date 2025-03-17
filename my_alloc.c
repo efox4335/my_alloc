@@ -91,3 +91,9 @@ static size_t get_aligned_size(size_t req)
 
 	return req;
 }
+
+//gets the pointer to the byte after the header
+static void *get_return_ptr(header *cur_block)
+{
+	return (void *) (((uintptr_t) cur_block) + sizeof(header));
+}
