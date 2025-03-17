@@ -97,3 +97,9 @@ static void *get_return_ptr(header *cur_block)
 {
 	return (void *) (((uintptr_t) cur_block) + sizeof(header));
 }
+
+//gets header pointer from pointer returned to my_alloc
+static header *get_block_ptr(void *ptr)
+{
+	return (header *) (((uintptr_t) ptr) - sizeof(header));
+}
