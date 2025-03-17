@@ -5,7 +5,7 @@
  * the lower 4 bits of any address and size will be 0 because of the the 16 alignment
  * header layout:
  * 0	set if block is allocated
- * 4-63	upper bits of size in bytes
+ * 4-63	upper bits of size in bytes including header
  *
  * 0	set if block is at the end of the list
  * 4-63	upper bits of the address of the next block in the list
@@ -77,4 +77,17 @@ static void set_block_size(header *header_ptr, size_t size)
 static void set_next_block_ptr(header *header_ptr, void *next_block_ptr)
 {
 	header_ptr->next_adr = (void *) (((uintptr_t) next_block_ptr) & (~0xf));
+}
+
+//converts a requested size to an aligned block size with at least req bytes of free space
+static size_t get_aligned_size(size_t req)
+{
+	req += sizeof(header);
+
+	if((req & 0xf) > 0){
+		req += 0x10;//add to keep alignment
+		req &= (~0xf);
+	}
+
+	return req;
 }
