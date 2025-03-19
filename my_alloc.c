@@ -14,6 +14,9 @@
 */
 #include <stdlib.h>
 #include <stdint.h>
+#include <unistd.h>
+
+#define SIZE_CLASS_COUNT 60
 
 static void *heap_base_ptr = NULL;//points to the base address of the heap
 static size_t heap_size = 0;//size of heap in bytes
@@ -22,12 +25,12 @@ static void *heap_end_ptr = NULL;//points to the end of the heap this address it
 #define INI_HEAP_SIZE 1024//in bytes
 #define HEADER_SIZE 16//in bytes
 
-static void *size_class_arr[60];
-
 typedef struct{
 	size_t size;
 	void *next_adr;
 }header;
+
+static header *size_class_arr[SIZE_CLASS_COUNT];
 
 static size_t get_block_size(header *header_ptr)
 {
@@ -102,4 +105,121 @@ static void *get_return_ptr(header *cur_block)
 static header *get_block_ptr(void *ptr)
 {
 	return (header *) (((uintptr_t) ptr) - sizeof(header));
+}
+
+static int get_size_class_index(size_t size)
+{
+	int leftmost_ind = 0;
+
+	for(int i = 0; i < 64; ++i){
+		if(((1 << i) & size) > 0){
+			leftmost_ind = i;
+		}
+	}
+
+	return leftmost_ind - 4;
+}
+
+/*
+ * removes cur_block from size class size_class
+ * if prev block is NULL if cur_block is the first in the list
+ * marks cur_block as allocated
+*/
+static void remove_block(header *cur_block, header *prev_block, size_t size_class)
+{
+	header *next_block;
+
+	if(is_list_end(cur_block)){
+		next_block = NULL;
+	}else{
+		next_block = get_next_block_ptr(cur_block);
+	}
+
+	if(prev_block == NULL){
+		size_class_arr[size_class] = next_block;
+	}else{
+		set_next_block_ptr(prev_block, next_block);
+
+		if(is_list_end(cur_block)){
+			set_block_list_end(prev_block);
+		}
+	}
+
+	set_block_allocated(cur_block);
+}
+
+/*
+ * gets block at least req_size bytes from the approiate size class
+ * returns null of no block is found
+*/
+static header *get_block(size_t req_size)
+{
+	int size_class_index = get_size_class_index(req_size);
+
+	if(size_class_arr[size_class_index] == NULL){
+		return NULL;
+	}
+
+	header *prev_block = NULL;
+	header *cur_block = size_class_arr[size_class_index];
+
+	while(1){
+		if(get_block_size(cur_block) >= req_size){
+			remove_block(cur_block, prev_block, size_class_index);
+
+			return cur_block;
+		}
+
+		if(is_list_end(cur_block)){
+			break;
+		}
+
+		prev_block = cur_block;
+		cur_block = get_next_block_ptr(cur_block);
+	}
+
+	return NULL;
+}
+
+/*
+ * sets size
+ * sets allocated bit
+*/
+static header *alloc_new_block(size_t size)
+{
+	header *new_block_ptr = heap_end_ptr;
+	sbrk(size);
+
+	heap_end_ptr = (void *) (((uintptr_t) heap_end_ptr) + size);
+
+	set_block_size(new_block_ptr, size);
+	set_block_allocated(new_block_ptr);
+
+	return new_block_ptr;
+}
+
+void *my_alloc(size_t size)
+{
+	size_t req_block_size = get_aligned_size(size);
+
+	//heap initialization
+	if(heap_base_ptr == NULL){
+		heap_base_ptr = sbrk(0);
+
+		heap_end_ptr = heap_base_ptr;
+
+		heap_size = 0;
+
+		for(int i = 0; i < SIZE_CLASS_COUNT; ++i){
+			size_class_arr[i] = NULL;
+		}
+	}
+
+	header *cur_block = get_block(req_block_size);
+
+	if(cur_block == NULL){
+		cur_block = alloc_new_block(req_block_size);
+	}
+
+	return get_return_ptr(cur_block);
 }
