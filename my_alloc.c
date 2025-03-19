@@ -124,6 +124,7 @@ static int get_size_class_index(size_t size)
  * removes cur_block from size class size_class
  * if prev block is NULL if cur_block is the first in the list
  * marks cur_block as allocated
+ * unsets list end
 */
 static void remove_block(header *cur_block, header *prev_block, size_t size_class)
 {
@@ -145,7 +146,25 @@ static void remove_block(header *cur_block, header *prev_block, size_t size_clas
 		}
 	}
 
+	unset_block_list_end(cur_block);
 	set_block_allocated(cur_block);
+}
+
+/*
+ * sets block as unallocated
+ */
+static void insert_block(header *cur_block, int size_class)
+{
+	set_block_free(cur_block);
+	header *next_block = size_class_arr[size_class];
+
+	size_class_arr[size_class] = cur_block;
+
+	set_next_block_ptr(cur_block, next_block);
+
+	if(next_block == NULL){
+		set_block_list_end(cur_block);
+	}
 }
 
 /*
@@ -222,4 +241,13 @@ void *my_alloc(size_t size)
 	}
 
 	return get_return_ptr(cur_block);
+}
+
+void my_free(void *ptr)
+{
+	header *cur_block = get_block_ptr(ptr);
+	size_t size = get_block_size(cur_block);
+	int size_class = get_size_class_index(size);
+
+	insert_block(cur_block, size_class);
 }
