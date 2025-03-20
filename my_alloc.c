@@ -110,14 +110,17 @@ static header *get_block_ptr(void *ptr)
 static int get_size_class_index(size_t size)
 {
 	int leftmost_ind = 0;
+	int iter_count = 0;
 
-	for(int i = 0; i < 64; ++i){
-		if(((1 << i) & size) > 0){
-			leftmost_ind = i;
+	for(int i = 1 << 3; i > 0; i <<= 1){
+		if((i & size) > 0){
+			leftmost_ind = iter_count;
 		}
+
+		++iter_count;
 	}
 
-	return leftmost_ind - 4;
+	return leftmost_ind;
 }
 
 /*
