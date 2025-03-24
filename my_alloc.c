@@ -11,6 +11,8 @@
  * 4-63	upper bits of the address of the next block in the list
  *
  * size classes are separated based on the leftmost 1 in the binary representation of size
+ *
+ * block merging will happen in one pass when the ratio of free blocks / created blocks reaches a certain level
 */
 #include <stdlib.h>
 #include <stdint.h>
@@ -210,6 +212,7 @@ static void split_block(header *cur_block, size_t req_size)
 }
 
 /*
+ * both blocks must be unallocated
  * does not remove blocks from lists
  * blocks must be adjacent in memory
  * lower_block must have a lower address than upper_block
