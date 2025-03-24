@@ -24,6 +24,9 @@ static void *heap_base_ptr = NULL;//points to the base address of the heap
 static size_t heap_size = 0;//size of heap in bytes
 static void *heap_end_ptr = NULL;//points to the end of the heap this address itself is not writable
 
+static size_t total_block_count = 0;
+static size_t free_block_count = 0;
+
 #define INI_HEAP_SIZE 1024//in bytes
 #define HEADER_SIZE 16//in bytes
 
@@ -162,6 +165,8 @@ static void remove_block(header *cur_block, header *prev_block, size_t size_clas
 		}
 	}
 
+	--free_block_count;
+
 	unset_block_list_end(cur_block);
 	set_block_allocated(cur_block);
 }
@@ -177,6 +182,8 @@ static void insert_block(header *cur_block, int size_class)
 	size_class_arr[size_class] = cur_block;
 
 	set_next_block_ptr(cur_block, next_block);
+
+	++free_block_count;
 
 	if(next_block == NULL){
 		set_block_list_end(cur_block);
@@ -198,6 +205,8 @@ static void split_block(header *cur_block, size_t req_size)
 	if(old_size - req_size < sizeof(header) + sizeof(void *)){
 		return;
 	}
+
+	++total_block_count;
 
 	set_block_size(cur_block, req_size);
 
@@ -270,6 +279,8 @@ static header *alloc_new_block(size_t size)
 
 	set_block_size(new_block_ptr, size);
 	set_block_allocated(new_block_ptr);
+
+	++total_block_count;
 
 	return new_block_ptr;
 }
