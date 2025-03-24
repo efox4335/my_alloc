@@ -265,6 +265,18 @@ static header *get_block(size_t req_size)
 		cur_block = get_next_block_ptr(cur_block);
 	}
 
+	for(int i = size_class_index + 1; i < SIZE_CLASS_COUNT; ++i){
+		if(size_class_arr[i] != NULL){
+			cur_block = size_class_arr[i];
+
+			remove_block(cur_block, NULL, i);
+
+			split_block(cur_block, req_size);
+
+			return cur_block;
+		}
+	}
+
 	return NULL;
 }
 
