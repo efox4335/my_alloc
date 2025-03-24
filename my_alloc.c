@@ -356,6 +356,9 @@ void *my_alloc(size_t size)
 		for(int i = 0; i < SIZE_CLASS_COUNT; ++i){
 			size_class_arr[i] = NULL;
 		}
+	//coalesceing heap if at least 1 in 8 blocks are free
+	}else if(total_block_count >= 50 && (free_block_count << 3) >= total_block_count){
+		coalesce_heap();
 	}
 
 	header *cur_block = get_block(req_block_size);
