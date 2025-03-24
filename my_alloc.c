@@ -231,6 +231,8 @@ static void merge_blocks(header *lower_block, header *upper_block)
 	size_t new_size = get_block_size(lower_block) + get_block_size(upper_block);
 
 	set_block_size(lower_block, new_size);
+
+	--total_block_count;
 }
 
 /*
@@ -264,6 +266,48 @@ static header *get_block(size_t req_size)
 	}
 
 	return NULL;
+}
+
+/*
+ * scans heap in sequential block order merging any adjacent blocks
+ * recreates all size class lists
+*/
+void coalesce_heap(void)
+{
+	for(int i = 0; i < SIZE_CLASS_COUNT; ++i){
+		size_class_arr[i] = NULL;
+	}
+
+	free_block_count = 0;
+
+	header *prev_block = NULL;
+	int unlisted_block = 0;
+
+	for(
+	header *cur_block = heap_base_ptr;
+	(uintptr_t) cur_block < (uintptr_t) heap_end_ptr;
+	cur_block = get_next_block_ptr_seq(cur_block)){
+		if(is_allocated(cur_block)){
+			if(prev_block != NULL){
+				insert_block(prev_block, get_size_class_index(get_block_size(prev_block)));
+			}
+			unlisted_block = 0;
+
+			prev_block = NULL;
+			continue;
+		}else if(prev_block == NULL){
+			prev_block = cur_block;
+			continue;
+		}
+
+		merge_blocks(prev_block, cur_block);
+
+		unlisted_block = 1;
+	}
+
+	if(unlisted_block == 1){
+		insert_block(prev_block, get_size_class_index(get_block_size(prev_block)));
+	}
 }
 
 /*
