@@ -210,6 +210,18 @@ static void split_block(header *cur_block, size_t req_size)
 }
 
 /*
+ * does not remove blocks from lists
+ * blocks must be adjacent in memory
+ * lower_block must have a lower address than upper_block
+ */
+static void merge_blocks(header *lower_block, header *upper_block)
+{
+	size_t new_size = get_block_size(lower_block) + get_block_size(upper_block);
+
+	set_block_size(lower_block, new_size);
+}
+
+/*
  * gets block at least req_size bytes from the approiate size class
  * returns null of no block is found
 */
