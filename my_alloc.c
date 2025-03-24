@@ -42,6 +42,9 @@ static int is_allocated(header *header_ptr)
 	return header_ptr->size & 0x1;
 }
 
+/*
+ * gets next block in list
+*/
 static void *get_next_block_ptr(header *header_ptr)
 {
 	return ((void *) (((uintptr_t) header_ptr->next_adr) & (~0xf)));
@@ -80,6 +83,14 @@ static void set_block_size(header *header_ptr, size_t size)
 static void set_next_block_ptr(header *header_ptr, void *next_block_ptr)
 {
 	header_ptr->next_adr = (void *) (((uintptr_t) next_block_ptr) & (~0xf));
+}
+
+/*
+ * gets block after cur_block in memory
+*/
+static void *get_next_block_ptr_seq(header *cur_block)
+{
+	return (void *) (((uintptr_t) cur_block) + get_block_size(cur_block));
 }
 
 //converts a requested size to an aligned block size with at least req bytes of free space
@@ -168,6 +179,34 @@ static void insert_block(header *cur_block, int size_class)
 	if(next_block == NULL){
 		set_block_list_end(cur_block);
 	}
+}
+
+/*
+ * req_size includes header
+ * size of cur_block must be >= req_size
+ * cur_block points to block of at least req_size bytes
+ * cur_block should be removed from its size class list before call
+ * other block created from split will be put in its size class list
+*/
+static void split_block(header *cur_block, size_t req_size)
+{
+	size_t old_size = get_block_size(cur_block);
+
+	//if new block would be of too small a size
+	if(old_size - req_size < sizeof(header) + sizeof(void *)){
+		return;
+	}
+
+	set_block_size(cur_block, req_size);
+
+	size_t new_block_size = old_size - req_size;
+	header *new_block = get_next_block_ptr_seq(cur_block);
+
+	set_block_size(new_block, new_block_size);
+
+	int new_block_size_class = get_size_class_index(new_block_size);
+
+	insert_block(new_block, new_block_size_class);
 }
 
 /*
