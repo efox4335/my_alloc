@@ -1,0 +1,31 @@
+{
+	"version": 6,
+
+	"cmakeMinimumRequired": {
+		"major": 3,
+		"minor": 29,
+		"patch": 3
+	},
+
+	"configurePresets": [
+		{
+			"name": "release",
+			"displayName": "release",
+			"binaryDir": "${sourceDir}/builds",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE":"Release",
+				"CMAKE_C_FLAGS": "-Wextra -Wall -Wpedantic -O3",
+				"ADRSAN": "FALSE"
+			}
+		}
+	],
+
+	"buildPresets": [
+		{
+			"name": "release",
+			"displayName": "release",
+			"configurePreset": "release",
+			"targets": ["my_alloc_shared", "my_alloc_static"]
+		}
+	]
+}
