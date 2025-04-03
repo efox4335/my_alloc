@@ -22,3 +22,8 @@ enable_testing()
 add_subdirectory(tests)
 
 include(CTest)
+
+install(TARGETS
+	${static_lib}
+	${shared_lib}
+)

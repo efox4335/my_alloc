@@ -13,8 +13,8 @@ set(headers
 	my_alloc.h
 )
 
-get_target_property(static_headers ${static_lib} PUBLIC_HEADER)
-get_target_property(shared_headers ${shared_lib} PUBLIC_HEADER)
+#get_target_property(static_headers ${static_lib} PUBLIC_HEADER)
+#get_target_property(shared_headers ${shared_lib} PUBLIC_HEADER)
 
 foreach(header_file IN LISTS headers)
 	list(APPEND static_headers ${CMAKE_CURRENT_SOURCE_DIR}/${header_file})
