@@ -1,8 +1,8 @@
 *
 !*.c
 !*.h
-!src**/*
-!tests**/*
-!CMakeLists.txt
-!CMakePresets.json
+!*/
+builds/
+!*CMakeLists.txt
+!*CMakePresets.json
 !.gitignore
