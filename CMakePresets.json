@@ -14,8 +14,17 @@
 			"binaryDir": "${sourceDir}/builds",
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE":"Release",
-				"CMAKE_C_FLAGS": "-Wextra -Wall -Wpedantic -O3",
-				"ADRSAN": "FALSE"
+				"CMAKE_C_FLAGS": "-Wextra -Wall -Wpedantic -O3"
+			}
+		},
+
+		{
+			"name": "test",
+			"displayName": "test",
+			"binaryDir": "${sourceDir}/builds",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE":"Debug",
+				"CMAKE_C_FLAGS": "-Wextra -Wall -Wpedantic -g"
 			}
 		}
 	],
@@ -26,6 +35,24 @@
 			"displayName": "release",
 			"configurePreset": "release",
 			"targets": ["my_alloc_shared", "my_alloc_static"]
+		},
+
+		{
+			"name": "test",
+			"displayName": "test",
+			"hidden": false,
+			"configurePreset": "test"
+		}
+	],
+
+	"testPresets": [
+		{
+			"name": "test",
+			"displayName": "test",
+			"hidden": false,
+			"configurePreset": "test",
+			"output": {"outputOnFailure": true},
+			"execution": {"noTestsAction": "error", "stopOnFailure": false}
 		}
 	]
 }

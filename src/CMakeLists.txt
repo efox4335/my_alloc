@@ -5,21 +5,21 @@ set(sources
 )
 
 foreach(source_file IN LISTS sources)
-	target_sources(${CMAKE_PROJECT_NAME}_static PUBLIC ${source_file})
-	target_sources(${CMAKE_PROJECT_NAME}_shared PUBLIC ${source_file})
+	target_sources(${static_lib} PUBLIC ${source_file})
+	target_sources(${shared_lib} PUBLIC ${source_file})
 endforeach()
 
 set(headers
 	my_alloc.h
 )
 
-get_target_property(static_headers ${CMAKE_PROJECT_NAME}_static PUBLIC_HEADER)
-get_target_property(shared_headers ${CMAKE_PROJECT_NAME}_shared PUBLIC_HEADER)
+get_target_property(static_headers ${static_lib} PUBLIC_HEADER)
+get_target_property(shared_headers ${shared_lib} PUBLIC_HEADER)
 
 foreach(header_file IN LISTS headers)
 	list(APPEND static_headers ${CMAKE_CURRENT_SOURCE_DIR}/${header_file})
 	list(APPEND shared_headers ${CMAKE_CURRENT_SOURCE_DIR}/${header_file})
 endforeach()
 
-set_target_properties(${CMAKE_PROJECT_NAME}_static PROPERTIES PUBLIC_HEADER "${static_headers}")
-set_target_properties(${CMAKE_PROJECT_NAME}_shared PROPERTIES PUBLIC_HEADER "${shared_headers}")
+set_target_properties(${static_lib} PROPERTIES PUBLIC_HEADER "${static_headers}")
+set_target_properties(${shared_lib} PROPERTIES PUBLIC_HEADER "${shared_headers}")
