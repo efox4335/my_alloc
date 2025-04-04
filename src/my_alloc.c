@@ -82,7 +82,7 @@ static void unset_block_list_end(header *header_ptr)
 
 static void set_block_size(header *header_ptr, size_t size)
 {
-	header_ptr->size = size & (~0xf);
+	header_ptr->size = (size & (~0xf)) + (header_ptr->size & 0xf);
 }
 
 static void set_next_block_ptr(header *header_ptr, void *next_block_ptr)
