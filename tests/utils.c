@@ -5,7 +5,7 @@
  * done so checking data integrity can be done by just storing the seed instead of an entire chunk
  * length is in bytes
  */
-static void set_mem(char *restrict ptr, int seed, size_t length)
+void set_mem(char *restrict ptr, int seed, size_t length)
 {
 	srand(seed);
 
@@ -28,11 +28,11 @@ static void set_mem(char *restrict ptr, int seed, size_t length)
 }
 
 /*
- * returns 1 if section is valid 0 if not
+ * returns length if section is valid invalid byte if not
  * length is in bytes
  * seed should be the same passed to set_mem
  */
-static int check_mem(char *restrict ptr, int seed, size_t length)
+int check_mem(char *restrict ptr, int seed, size_t length)
 {
 	srand(seed);
 

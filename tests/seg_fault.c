@@ -3,7 +3,7 @@
 */
 
 #include "my_alloc.h"
-#include "utils.c"
+#include "utils.h"
 
 #define BUF_SIZE 1000
 #define SEED 2342235
