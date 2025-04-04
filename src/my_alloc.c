@@ -87,7 +87,7 @@ static void set_block_size(header *header_ptr, size_t size)
 
 static void set_next_block_ptr(header *header_ptr, void *next_block_ptr)
 {
-	header_ptr->next_adr = (void *) (((uintptr_t) next_block_ptr) & (~0xf));
+	header_ptr->next_adr = (void *) ((((uintptr_t) next_block_ptr) & (~0xf)) + (((uintptr_t) header_ptr->next_adr) & 0xf));
 }
 
 /*
