@@ -31,9 +31,9 @@
 #include "utils.h"
 #include <stdio.h>
 
-#define MAX_BLOCK_SIZE 100
+#define MAX_BLOCK_SIZE 1000000
 #define SEED 139485
-#define BLOCK_COUNT 100
+#define BLOCK_COUNT 1000
 
 #define ALLOCATED 1
 #define FREE 0
