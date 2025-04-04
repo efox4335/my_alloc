@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.29.3)
 
 set(test_sources
+	seg_fault.c
 )
 
 foreach(source IN LISTS test_sources)
