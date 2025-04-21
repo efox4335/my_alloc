@@ -37,12 +37,12 @@ typedef struct{
 
 static header *size_class_arr[SIZE_CLASS_COUNT];
 
-static size_t get_block_size(header *header_ptr)
+static inline size_t get_block_size(header *header_ptr)
 {
 	return header_ptr->size & (~0xf);
 }
 
-static int is_allocated(header *header_ptr)
+static inline int is_allocated(header *header_ptr)
 {
 	return header_ptr->size & 0x1;
 }
@@ -50,42 +50,42 @@ static int is_allocated(header *header_ptr)
 /*
  * gets next block in list
 */
-static void *get_next_block_ptr(header *header_ptr)
+static inline void *get_next_block_ptr(header *header_ptr)
 {
 	return ((void *) (((uintptr_t) header_ptr->next_adr) & (~0xf)));
 }
 
-static int is_list_end(header *header_ptr)
+static inline int is_list_end(header *header_ptr)
 {
 	return (uintptr_t) header_ptr->next_adr & 0x1;
 }
 
-static void set_block_allocated(header *header_ptr)
+static inline void set_block_allocated(header *header_ptr)
 {
 	header_ptr->size |= 0x1;
 }
 
-static void set_block_free(header *header_ptr)
+static inline void set_block_free(header *header_ptr)
 {
 	header_ptr->size &= ~0x1;
 }
 
-static void set_block_list_end(header *header_ptr)
+static inline void set_block_list_end(header *header_ptr)
 {
 	header_ptr->next_adr = (void *) ((uintptr_t) header_ptr->next_adr | 0x1);
 }
 
-static void unset_block_list_end(header *header_ptr)
+static inline void unset_block_list_end(header *header_ptr)
 {
 	header_ptr->next_adr = (void *) ((uintptr_t) header_ptr->next_adr & ~0x1);
 }
 
-static void set_block_size(header *header_ptr, size_t size)
+static inline void set_block_size(header *header_ptr, size_t size)
 {
 	header_ptr->size = (size & (~0xf)) + (header_ptr->size & 0xf);
 }
 
-static void set_next_block_ptr(header *header_ptr, void *next_block_ptr)
+static inline void set_next_block_ptr(header *header_ptr, void *next_block_ptr)
 {
 	header_ptr->next_adr = (void *) ((((uintptr_t) next_block_ptr) & (~0xf)) + (((uintptr_t) header_ptr->next_adr) & 0xf));
 }
@@ -93,7 +93,7 @@ static void set_next_block_ptr(header *header_ptr, void *next_block_ptr)
 /*
  * gets block after cur_block in memory
 */
-static void *get_next_block_ptr_seq(header *cur_block)
+static inline void *get_next_block_ptr_seq(header *cur_block)
 {
 	return (void *) (((uintptr_t) cur_block) + get_block_size(cur_block));
 }
@@ -112,13 +112,13 @@ static size_t get_aligned_size(size_t req)
 }
 
 //gets the pointer to the byte after the header
-static void *get_return_ptr(header *cur_block)
+static inline void *get_return_ptr(header *cur_block)
 {
 	return (void *) (((uintptr_t) cur_block) + sizeof(header));
 }
 
 //gets header pointer from pointer returned to my_alloc
-static header *get_block_ptr(void *ptr)
+static inline header *get_block_ptr(void *ptr)
 {
 	return (header *) (((uintptr_t) ptr) - sizeof(header));
 }
