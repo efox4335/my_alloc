@@ -341,20 +341,39 @@ static header *alloc_new_block(size_t size)
 	return new_block_ptr;
 }
 
+/*
+ * returns 0 on fail
+*/
+int heap_init(void)
+{
+	heap_base_ptr = sbrk(0);
+
+	if(heap_base_ptr == (void *) -1){
+		return 0;
+	}
+
+	heap_end_ptr = heap_base_ptr;
+
+	heap_size = 0;
+
+	for(int i = 0; i < SIZE_CLASS_COUNT; ++i){
+		size_class_arr[i] = NULL;
+	}
+
+	return 1;
+}
+
+/*
+ * returns null on fail
+*/
 void *my_alloc(size_t size)
 {
 	size_t req_block_size = get_aligned_size(size);
 
 	//heap initialization
 	if(heap_base_ptr == NULL){
-		heap_base_ptr = sbrk(0);
-
-		heap_end_ptr = heap_base_ptr;
-
-		heap_size = 0;
-
-		for(int i = 0; i < SIZE_CLASS_COUNT; ++i){
-			size_class_arr[i] = NULL;
+		if(heap_init() == 0){
+			return NULL;
 		}
 	//coalesceing heap if at least 1 in 8 blocks are free
 	}else if(total_block_count >= 50 && (free_block_count << 3) >= total_block_count){
