@@ -189,6 +189,8 @@ static void insert_block(header *cur_block, int size_class)
 }
 
 /*
+ * cur_block is resized to req_size bytes
+ * new block is taken from end of cur_block
  * req_size includes header
  * size of cur_block must be >= req_size
  * cur_block points to block of at least req_size bytes
