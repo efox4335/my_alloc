@@ -28,23 +28,29 @@ static size_t total_block_count = 0;
 static size_t free_block_count = 0;
 
 #define INI_HEAP_SIZE 1024//in bytes
-#define HEADER_SIZE 16//in bytes
+
+#define MIN_SIZE 0x10
+#define ALIGN_MASK 0xf
+#define ALLOC_BIT 0x1
+#define LIST_END_BIT 0x1
 
 typedef struct{
 	size_t size;
 	void *next_adr;
 }header;
 
+#define HEADER_SIZE sizeof(header)//in bytes
+
 static header *size_class_arr[SIZE_CLASS_COUNT];
 
 static inline size_t get_block_size(header *header_ptr)
 {
-	return header_ptr->size & (~0xf);
+	return header_ptr->size & (~ALIGN_MASK);
 }
 
 static inline int is_allocated(header *header_ptr)
 {
-	return header_ptr->size & 0x1;
+	return header_ptr->size & ALLOC_BIT;
 }
 
 /*
@@ -52,42 +58,42 @@ static inline int is_allocated(header *header_ptr)
 */
 static inline void *get_next_block_ptr(header *header_ptr)
 {
-	return ((void *) (((uintptr_t) header_ptr->next_adr) & (~0xf)));
+	return ((void *) (((uintptr_t) header_ptr->next_adr) & (~ALIGN_MASK)));
 }
 
 static inline int is_list_end(header *header_ptr)
 {
-	return (uintptr_t) header_ptr->next_adr & 0x1;
+	return (uintptr_t) header_ptr->next_adr & LIST_END_BIT;
 }
 
 static inline void set_block_allocated(header *header_ptr)
 {
-	header_ptr->size |= 0x1;
+	header_ptr->size |= ALLOC_BIT;
 }
 
 static inline void set_block_free(header *header_ptr)
 {
-	header_ptr->size &= ~0x1;
+	header_ptr->size &= ~ALLOC_BIT;
 }
 
 static inline void set_block_list_end(header *header_ptr)
 {
-	header_ptr->next_adr = (void *) ((uintptr_t) header_ptr->next_adr | 0x1);
+	header_ptr->next_adr = (void *) ((uintptr_t) header_ptr->next_adr | LIST_END_BIT);
 }
 
 static inline void unset_block_list_end(header *header_ptr)
 {
-	header_ptr->next_adr = (void *) ((uintptr_t) header_ptr->next_adr & ~0x1);
+	header_ptr->next_adr = (void *) ((uintptr_t) header_ptr->next_adr & ~LIST_END_BIT);
 }
 
 static inline void set_block_size(header *header_ptr, size_t size)
 {
-	header_ptr->size = (size & (~0xf)) + (header_ptr->size & 0xf);
+	header_ptr->size = (size & (~ALIGN_MASK)) + (header_ptr->size & ALIGN_MASK);
 }
 
 static inline void set_next_block_ptr(header *header_ptr, void *next_block_ptr)
 {
-	header_ptr->next_adr = (void *) ((((uintptr_t) next_block_ptr) & (~0xf)) + (((uintptr_t) header_ptr->next_adr) & 0xf));
+	header_ptr->next_adr = (void *) ((((uintptr_t) next_block_ptr) & (~ALIGN_MASK)) + (((uintptr_t) header_ptr->next_adr) & ALIGN_MASK));
 }
 
 /*
@@ -103,9 +109,9 @@ static size_t get_aligned_size(size_t req)
 {
 	req += sizeof(header);
 
-	if((req & 0xf) > 0){
-		req += 0x10;//add to keep alignment
-		req &= (~0xf);
+	if((req & ALIGN_MASK) > 0){
+		req += MIN_SIZE;//add to keep alignment
+		req &= (~ALIGN_MASK);
 	}
 
 	return req;
