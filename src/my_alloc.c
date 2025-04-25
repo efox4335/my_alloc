@@ -169,12 +169,8 @@ static void remove_block(header *cur_block, header *prev_block, size_t size_clas
 	unset_block_list_end(cur_block);
 }
 
-/*
- * sets block as unallocated
- */
 static void insert_block(header *cur_block, int size_class)
 {
-	set_block_free(cur_block);
 	header *next_block = size_class_arr[size_class];
 
 	size_class_arr[size_class] = cur_block;
@@ -214,6 +210,7 @@ static void split_block(header *cur_block, size_t req_size)
 	header *new_block = get_next_block_ptr_seq(cur_block);
 
 	set_block_size(new_block, new_block_size);
+	set_block_free(new_block);
 
 	int new_block_size_class = get_size_class_index(new_block_size);
 
@@ -403,6 +400,8 @@ void my_free(void *ptr)
 	header *cur_block = get_block_ptr(ptr);
 	size_t size = get_block_size(cur_block);
 	int size_class = get_size_class_index(size);
+
+	set_block_free(ptr);
 
 	insert_block(cur_block, size_class);
 }
