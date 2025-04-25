@@ -142,7 +142,6 @@ static int get_size_class_index(size_t size)
 /*
  * removes cur_block from size class size_class
  * if prev block is NULL if cur_block is the first in the list
- * marks cur_block as allocated
  * unsets list end
 */
 static void remove_block(header *cur_block, header *prev_block, size_t size_class)
@@ -168,7 +167,6 @@ static void remove_block(header *cur_block, header *prev_block, size_t size_clas
 	--free_block_count;
 
 	unset_block_list_end(cur_block);
-	set_block_allocated(cur_block);
 }
 
 /*
@@ -324,7 +322,6 @@ void coalesce_heap(void)
 
 /*
  * sets size
- * sets allocated bit
 */
 static header *alloc_new_block(size_t size)
 {
@@ -339,7 +336,6 @@ static header *alloc_new_block(size_t size)
 	heap_end_ptr = (void *) (((uintptr_t) heap_end_ptr) + size);
 
 	set_block_size(new_block_ptr, size);
-	set_block_allocated(new_block_ptr);
 
 	++total_block_count;
 
@@ -394,6 +390,8 @@ void *my_alloc(size_t size)
 			return NULL;
 		}
 	}
+
+	set_block_allocated(cur_block);
 
 	return get_return_ptr(cur_block);
 }
