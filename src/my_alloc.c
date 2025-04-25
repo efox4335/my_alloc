@@ -329,7 +329,12 @@ void coalesce_heap(void)
 static header *alloc_new_block(size_t size)
 {
 	header *new_block_ptr = heap_end_ptr;
-	sbrk(size);
+
+	void *ret_val = sbrk(size);
+
+	if(ret_val == (void *) -1){
+		return NULL;
+	}
 
 	heap_end_ptr = (void *) (((uintptr_t) heap_end_ptr) + size);
 
@@ -384,6 +389,10 @@ void *my_alloc(size_t size)
 
 	if(cur_block == NULL){
 		cur_block = alloc_new_block(req_block_size);
+
+		if(cur_block == NULL){
+			return NULL;
+		}
 	}
 
 	return get_return_ptr(cur_block);
