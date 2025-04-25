@@ -358,6 +358,17 @@ int heap_init(void)
 		return 0;
 	}
 
+	//in case initial break point is unaglined
+	if((((uintptr_t) heap_base_ptr) & ALIGN_MASK) != 0){
+		size_t align_diff = MIN_SIZE - (((uintptr_t) heap_base_ptr) & (~ALIGN_MASK));
+
+		heap_base_ptr = sbrk(align_diff);
+
+		if(heap_base_ptr == (void *) -1){
+			return 0;
+		}
+	}
+
 	heap_end_ptr = heap_base_ptr;
 
 	heap_size = 0;
